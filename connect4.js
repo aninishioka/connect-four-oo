@@ -9,10 +9,8 @@
 
 const WIDTH = 7;
 const HEIGHT = 6;
+const START_BUTTON = document.querySelector('#start-game');
 
-// let currPlayer = 1; // active player: 1 or 2
-// const board = []; // array of rows, each row is array of cells  (board[y][x])
-// // (board[5][0] would be the bottom-left spot on the board)
 
 class Player {
   constructor(color) {
@@ -21,11 +19,12 @@ class Player {
 }
 
 class Game {
-  constructor(height = HEIGHT, width = WIDTH) {
+  constructor(player1, player2, height = HEIGHT, width = WIDTH) {
     this.height = height;
     this.width = width;
-    this.player1 = new Player();
-    this.player2 = new Player();
+    //TODO: change to players array
+    this.player1 = player1;
+    this.player2 = player2;
     this.currPlayer = this.player1; // active player: 1 or 2
     this.board = []; // array of rows, each row is array of cells  (board[y][x])
     this.makeBoard();
@@ -50,7 +49,6 @@ class Game {
     const htmlBoard = document.getElementById("board");
     htmlBoard.innerHTML = '';
 
-    // TODO: add comment for this code
     const top = document.createElement("tr");
     top.setAttribute("id", "column-top");
 
@@ -95,7 +93,7 @@ class Game {
   placeInTable(y, x) {
     const piece = document.createElement('div');
     piece.classList.add('piece');
-    piece.classList.add(`p${this.currPlayer}`);
+    piece.style.backgroundColor = this.currPlayer.color;
 
     const spot = document.getElementById(`c-${y}-${x}`);
     spot.append(piece);
@@ -170,7 +168,7 @@ class Game {
 
     // check for win
     if (this.checkForWin()) {
-      return this.endGame(`Player ${this.currPlayer} won!`);
+      return this.endGame(`Player ${this.currPlayer.color} won!`);
     }
 
     // check for tie: if top row is filled, board is filled
@@ -183,7 +181,17 @@ class Game {
   }
 }
 
-const startButton = document.querySelector('#start-button');
-startButton.addEventListener("click", function () {
-  new Game();
-});
+START_BUTTON.addEventListener("click", startGame);
+
+/** Starts game by instantianting player and game instances. */
+
+function startGame(evt) {
+  evt.preventDefault();
+  const player1Color = document.getElementById('color-1').value;
+  const player2Color = document.getElementById('color-2').value;
+
+  const player1 = new Player(player1Color);
+  const player2 = new Player(player2Color);
+
+  new Game(player1, player2);
+}
