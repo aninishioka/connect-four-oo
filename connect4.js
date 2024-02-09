@@ -14,14 +14,23 @@ const HEIGHT = 6;
 // const board = []; // array of rows, each row is array of cells  (board[y][x])
 // // (board[5][0] would be the bottom-left spot on the board)
 
+class Player {
+  constructor(color) {
+    this.color = color;
+  }
+}
+
 class Game {
-  constructor(height=HEIGHT, width=WIDTH) {
+  constructor(height = HEIGHT, width = WIDTH) {
     this.height = height;
     this.width = width;
-    this.currPlayer = 1; // active player: 1 or 2
+    this.player1 = new Player();
+    this.player2 = new Player();
+    this.currPlayer = this.player1; // active player: 1 or 2
     this.board = []; // array of rows, each row is array of cells  (board[y][x])
     this.makeBoard();
     this.makeHtmlBoard();
+    this.gameEnded = false;
   }
 
   /** makeBoard: fill in global `board`:
@@ -48,7 +57,7 @@ class Game {
     for (let x = 0; x < this.width; x++) {
       const headCell = document.createElement("td");
       headCell.setAttribute("id", `top-${x}`);
-      headCell.addEventListener("click", this.handleClick);
+      headCell.addEventListener("click", this.handleClick.bind(this));
       top.append(headCell);
     }
     htmlBoard.append(top);
@@ -86,7 +95,7 @@ class Game {
   placeInTable(y, x) {
     const piece = document.createElement('div');
     piece.classList.add('piece');
-    piece.classList.add(`p${currPlayer}`);
+    piece.classList.add(`p${this.currPlayer}`);
 
     const spot = document.getElementById(`c-${y}-${x}`);
     spot.append(piece);
@@ -96,6 +105,7 @@ class Game {
 
   endGame(msg) {
     alert(msg);
+    this.gameEnded = true;
   }
 
   /** checkForWin: check board cell-by-cell for "does a win start here?" */
@@ -126,8 +136,10 @@ class Game {
         const diagDR = [[y, x], [y + 1, x + 1], [y + 2, x + 2], [y + 3, x + 3]];
         const diagDL = [[y, x], [y + 1, x - 1], [y + 2, x - 2], [y + 3, x - 3]];
 
+        const bindedWin = _win.bind(this);
+
         // find winner (only checking each win-possibility as needed)
-        if (_win(horiz) || _win(vert) || _win(diagDR) || _win(diagDL)) {
+        if (bindedWin(horiz) || bindedWin(vert) || bindedWin(diagDR) || bindedWin(diagDL)) {
           return true;
         }
       }
@@ -138,6 +150,11 @@ class Game {
   /** handleClick: handle click of column top to play piece */
 
   handleClick(evt) {
+
+    if (this.gameEnded) {
+      return;
+    }
+
     // get x from ID of clicked cell
     const x = Number(evt.target.id.slice("top-".length));
 
@@ -162,6 +179,11 @@ class Game {
     }
 
     // switch players
-    this.currPlayer = this.currPlayer === 1 ? 2 : 1;
+    this.currPlayer = this.currPlayer === this.player1 ? this.player2 : this.player1;
   }
 }
+
+const startButton = document.querySelector('#start-button');
+startButton.addEventListener("click", function () {
+  new Game();
+});
